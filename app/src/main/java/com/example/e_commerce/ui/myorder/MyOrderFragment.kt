@@ -66,7 +66,7 @@ class MyOrderFragment : Fragment() {
     private fun getData() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userRef =
-            FirebaseDatabase.getInstance().reference.child("Users").child(currentUser!!.uid)
+            FirebaseDatabase.getInstance().reference.child("Users").child(currentUser!!.displayName!!)
                 .child("My Order")
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

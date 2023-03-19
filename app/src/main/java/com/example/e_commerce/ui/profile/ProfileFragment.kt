@@ -14,7 +14,9 @@ import com.example.e_commerce.R
 import com.example.e_commerce.data.PrefManager
 import com.example.e_commerce.databinding.FragmentProfileBinding
 import com.example.e_commerce.ui.cart.CartFragment
+import com.example.e_commerce.ui.home.HomeFragment
 import com.example.e_commerce.ui.login.ProfileBeforeLogin
+import com.example.e_commerce.ui.menu.MenuFragment
 import com.example.e_commerce.ui.myorder.MyOrderFragment
 import com.google.firebase.auth.FirebaseAuth
 
@@ -42,9 +44,15 @@ class ProfileFragment : Fragment() {
         val root: View = binding.root
         prefManager = PrefManager(requireContext())
 
-        if (!prefManager.isLogin()){
-            loadFragment(ProfileBeforeLogin())
+        if (prefManager.isLogin()){
+            data()
+        }else{
+            loadFragment(MenuFragment())
         }
+
+//        if (!prefManager.isLogin()){
+//            loadFragment(ProfileBeforeLogin())
+//        }
 
 
 
@@ -54,16 +62,16 @@ class ProfileFragment : Fragment() {
 //
 //        binding.nameProfile.text = userName
 //        binding.emailProfile.text = userEmail
-//
-//        binding.myCartProfile.setOnClickListener {
-//            val fragment = CartFragment()
-//            loadFragment(fragment)
-//        }
-//
-//        binding.myOrdersProile.setOnClickListener {
-//            val fragment = MyOrderFragment()
-//            loadFragment(fragment)
-//        }
+
+        binding.myCartProfile.setOnClickListener {
+            val fragment = CartFragment()
+            loadFragment(fragment)
+        }
+
+        binding.myOrdersProile.setOnClickListener {
+            val fragment = MyOrderFragment()
+            loadFragment(fragment)
+        }
 
 
 
@@ -93,6 +101,15 @@ class ProfileFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun data(){
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userName = currentUser!!.displayName
+        val userEmail = currentUser!!.email
+
+        binding.nameProfile.text = userName
+        binding.emailProfile.text = userEmail
     }
 
     private fun loadFragment(fragment: Fragment) {

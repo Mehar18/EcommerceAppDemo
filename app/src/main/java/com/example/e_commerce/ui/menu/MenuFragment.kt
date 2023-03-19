@@ -14,6 +14,7 @@ import com.example.e_commerce.data.PrefManager
 import com.example.e_commerce.databinding.FragmentMenuBinding
 import com.example.e_commerce.databinding.FragmentProfileBinding
 import com.example.e_commerce.ui.home.HomeFragment
+import com.example.e_commerce.ui.login.ProfileBeforeLogin
 import com.google.firebase.auth.FirebaseAuth
 
 class MenuFragment : Fragment() {
@@ -49,6 +50,9 @@ class MenuFragment : Fragment() {
         }
         if (prefManager.isLogin()) {
             binding.usernameCurrent.text = user!!.displayName
+        }else{
+//            binding.logOut.text = "Not Login Yet"
+            loadFragment(ProfileBeforeLogin())
         }
         return root
     }
@@ -61,6 +65,7 @@ class MenuFragment : Fragment() {
         val manager = (requireContext() as AppCompatActivity).supportFragmentManager
         manager.beginTransaction().apply {
             replace(R.id.frame_layout,fragment)
+            addToBackStack(null)
             commit()
         }
     }

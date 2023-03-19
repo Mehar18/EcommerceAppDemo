@@ -1,5 +1,6 @@
 package com.example.e_commerce.ui.cart
 
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,6 +17,7 @@ import com.example.e_commerce.adapter.MyCartAdapter
 import com.example.e_commerce.data.DealItem
 import com.example.e_commerce.data.PrefManager
 import com.example.e_commerce.ui.home.HomeFragment
+import com.example.e_commerce.ui.menu.MenuFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -23,10 +25,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
 class CartFragment : Fragment() {
-
+    private  lateinit var progressDialog: ProgressDialog
     private val list: ArrayList<DealItem> = ArrayList()
     private val list2: ArrayList<DealItem> = ArrayList()
-    val TAG="CartFragment"
+    val TAG = "CartFragment"
 
     lateinit var mAdapter: MyCartAdapter
     lateinit var priceTV: TextView
@@ -40,11 +42,13 @@ class CartFragment : Fragment() {
     ): View {
 
         val mView = inflater.inflate(R.layout.fragment_cart, container, false)
-
+     //   progressDialog = ProgressDialog(requireContext())
+       // progressDialog.show()
         priceTV = mView.findViewById(R.id.total_price)
         val placedOrder: Button = mView.findViewById(R.id.place_order)
         placedOrder.setOnClickListener {
             getDataToPlaceOrder()
+            loadFragment(HomeFragment())
             val fragment = OrderPlaced()
             loadFragment(fragment)
         }
@@ -58,9 +62,15 @@ class CartFragment : Fragment() {
 
         prefManager = PrefManager(requireContext())
 
+        if (prefManager.isLogin()) {
+            getData()
+        }else{
+//            recyclerView.visibility = View.GONE
+//            placedOrder.visibility = View.GONE
+            loadFragment(MenuFragment())
 
-                getData()
 
+        }
 
 
         return mView
@@ -69,7 +79,8 @@ class CartFragment : Fragment() {
     private fun getData() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userRef =
-            FirebaseDatabase.getInstance().reference.child("Users").child(currentUser!!.displayName!!)
+            FirebaseDatabase.getInstance().reference.child("Users")
+                .child(currentUser!!.displayName!!)
                 .child("Cart Item")
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -86,12 +97,13 @@ class CartFragment : Fragment() {
                         itemPrice = cartData.price
                         price += cartData.price
                         list.add(DealItem(itemImage, itemName, itemPrice))
-                       // Log.d("list",list.toString())
+                        // Log.d("list",list.toString())
 
                     }
                     priceTV.text = "\u20B9 $price"
                     mAdapter = MyCartAdapter(list)
                     recyclerView.adapter = mAdapter
+                   // progressDialog.dismiss()
 
 
                 }
@@ -110,10 +122,10 @@ class CartFragment : Fragment() {
     private fun getDataToPlaceOrder() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userRef =
-            FirebaseDatabase.getInstance().reference.child("Users").child(currentUser!!.uid)
+            FirebaseDatabase.getInstance().reference.child("Users").child(currentUser!!.displayName!!)
                 .child("Cart Item")
         val userRefPlacedOrder = FirebaseDatabase.getInstance().reference.child("Users").child(
-            currentUser.uid
+            currentUser.displayName!!
         ).child("My Order")
         val adminReference = FirebaseDatabase.getInstance().getReference("OrdersReceived")
 
@@ -140,7 +152,7 @@ class CartFragment : Fragment() {
 //                    for (item in list2) {
 //                        Log.d("child",item.name)
                         val itemQuery = userRef.orderByChild(itemName)
-                        itemQuery.addListenerForSingleValueEvent(object :ValueEventListener{
+                        itemQuery.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 for (itemSnapshot in snapshot.children) {
                                     // Get the item data
@@ -148,7 +160,8 @@ class CartFragment : Fragment() {
                                     itemSnapshot.ref.removeValue()
                                     userRefPlacedOrder.child(itemData!!.name).setValue(itemData)
                                     userRefPlacedOrder.push()
-                                    adminReference.child(currentUser.displayName!!).child(itemData.name).setValue(itemData)
+                                    adminReference.child(currentUser.displayName!!)
+                                        .child(itemData.name).setValue(itemData)
                                     // Remove the item from the cart reference
 
                                     mAdapter.notifyDataSetChanged()
@@ -174,14 +187,15 @@ class CartFragment : Fragment() {
                 TODO("Not yet implemented")
             }
 
-        } )
+        })
 
 
     }
+
     private fun loadFragment(fragment: Fragment) {
         val manager = (requireContext() as AppCompatActivity).supportFragmentManager
         manager.beginTransaction().apply {
-            replace(R.id.frame_layout,fragment)
+            replace(R.id.frame_layout, fragment)
             commit()
         }
     }

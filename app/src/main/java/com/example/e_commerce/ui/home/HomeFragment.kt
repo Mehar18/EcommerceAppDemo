@@ -92,8 +92,8 @@ private val autoSlide: Runnable = object : Runnable {
 
         if (prefManager.isLogin()) {
             val currentUser = FirebaseAuth.getInstance().currentUser
-//            val userName = currentUser!!.displayName
- //           binding.deliverToName.text = getString(R.string.deliver, userName)
+            val userName = currentUser!!.displayName
+           binding.deliverToName.text = getString(R.string.deliver, userName)
         }
 
 

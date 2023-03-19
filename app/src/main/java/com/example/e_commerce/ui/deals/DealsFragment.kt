@@ -11,12 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.e_commerce.R
 import com.example.e_commerce.adapter.DealAdapter
 import com.example.e_commerce.data.DealItem
+import com.example.e_commerce.data.PrefManager
 
 
 class DealsFragment : Fragment(),DealAdapter.OnItemClick {
         private lateinit var mAdapter:DealAdapter
         private val list:ArrayList<DealItem> = ArrayList()
     private lateinit var recyclerView:RecyclerView
+    lateinit var prefManager: PrefManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +31,7 @@ class DealsFragment : Fragment(),DealAdapter.OnItemClick {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        prefManager= PrefManager(requireContext())
 
         val mView= inflater.inflate(R.layout.fragment_deals, container, false)
 
@@ -54,14 +57,18 @@ class DealsFragment : Fragment(),DealAdapter.OnItemClick {
 
 
     override fun onItemClick(position: Int) {
-        val fragment = DetailedItemFragment()
-        val bundle = Bundle()
+        if (prefManager.isLogin()) {
+            val fragment = DetailedItemFragment()
+            val bundle = Bundle()
 
-        bundle.putString("image",list[position].image.toString())
-        bundle.putString("name",list[position].name)
-        bundle.putString("price",list[position].price.toString())
-        fragment.arguments = bundle
-        loadFragment(fragment)
+            bundle.putString("image", list[position].image.toString())
+            bundle.putString("name", list[position].name)
+            bundle.putString("price", list[position].price.toString())
+            fragment.arguments = bundle
+            loadFragment(fragment)
+        }else{
+            loadFragment(DetailedItemFragment())
+        }
 
     }
     private fun loadFragment(fragment: Fragment) {
