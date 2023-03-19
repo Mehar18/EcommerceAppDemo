@@ -66,8 +66,8 @@ class MyOrderFragment : Fragment() {
     private fun getData() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userRef =
-            FirebaseDatabase.getInstance().reference.child("Users").child(currentUser!!.displayName!!)
-                .child("My Order")
+            FirebaseDatabase.getInstance().reference.child("OrdersReceived")
+                .child(currentUser!!.displayName!!)
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -77,17 +77,19 @@ class MyOrderFragment : Fragment() {
                     var itemPrice: Int
                     var price = 0
                     for (snap in snapshot.children) {
-                        val myOrderData = snap.getValue(MyOrderItem::class.java)
-                        itemImage = myOrderData?.image!!
-                        itemName = myOrderData.name
-                        itemPrice = myOrderData.price
-                        price += myOrderData.price
+                        val cartData = snap.getValue(DealItem::class.java)
+                        itemImage = cartData?.image!!
+                        itemName = cartData.name
+                        itemPrice = cartData.price
+                        price += cartData.price
                         myOrdersList.add(MyOrderItem(itemImage, itemName, itemPrice))
+                        // Log.d("list",list.toString())
 
                     }
-                   // priceTV.text = "\u20B9 $price"
+                  //  priceTV.text = "\u20B9 $price"
                     mAdapter = MyOrdersAdapter(myOrdersList)
                     recyclerView.adapter = mAdapter
+                    // progressDialog.dismiss()
 
 
                 }
